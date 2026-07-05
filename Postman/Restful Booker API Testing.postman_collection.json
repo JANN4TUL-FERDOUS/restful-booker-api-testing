@@ -142,21 +142,21 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "const response = pm.response.json();",
+                  "",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
-                  "",
-                  "const response = pm.response.json();",
                   "",
                   "pm.test(\"Booking ID is returned\", function () {",
                   "    pm.expect(response.bookingid).to.exist;",
                   "});",
                   "",
-                  "pm.test(\"Firstname is correct\", function () {",
+                  "pm.test(\"First name is correct\", function () {",
                   "    pm.expect(response.booking.firstname).to.eql(\"John\");",
                   "});",
                   "",
-                  "pm.test(\"Lastname is correct\", function () {",
+                  "pm.test(\"Last name is correct\", function () {",
                   "    pm.expect(response.booking.lastname).to.eql(\"Doe\");",
                   "});",
                   "",
@@ -164,21 +164,15 @@
                   "    pm.expect(response.booking.totalprice).to.eql(120);",
                   "});",
                   "",
-                  "pm.test(\"Deposit paid is correct\", function () {",
-                  "    pm.expect(response.booking.depositpaid).to.be.true;",
+                  "pm.test(\"Deposit status is correct\", function () {",
+                  "    pm.expect(response.booking.depositpaid).to.eql(true);",
                   "});",
                   "",
-                  "pm.test(\"Check-in date is correct\", function () {",
-                  "    pm.expect(response.booking.bookingdates.checkin).to.eql(\"2025-07-15\");",
+                  "pm.test(\"Response time is less than 1000 ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
                   "});",
                   "",
-                  "pm.test(\"Check-out date is correct\", function () {",
-                  "    pm.expect(response.booking.bookingdates.checkout).to.eql(\"2025-07-20\");",
-                  "});",
-                  "",
-                  "pm.test(\"Additional needs is correct\", function () {",
-                  "    pm.expect(response.booking.additionalneeds).to.eql(\"Breakfast\");",
-                  "});"
+                  "pm.environment.set(\"bookingid\", response.bookingid);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -211,6 +205,143 @@
               ],
               "path": [
                 "booking"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Booking by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"First name is correct\", function () {\r",
+                  "    pm.expect(response.firstname).to.eql(\"John\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Last name is correct\", function () {\r",
+                  "    pm.expect(response.lastname).to.eql(\"Doe\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Total price is correct\", function () {\r",
+                  "    pm.expect(response.totalprice).to.eql(120);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deposit status is true\", function () {\r",
+                  "    pm.expect(response.depositpaid).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Check-in date is correct\", function () {\r",
+                  "    pm.expect(response.bookingdates.checkin).to.eql(\"2025-07-15\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Check-out date is correct\", function () {\r",
+                  "    pm.expect(response.bookingdates.checkout).to.eql(\"2025-07-20\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Additional needs are correct\", function () {\r",
+                  "    pm.expect(response.additionalneeds).to.eql(\"Breakfast\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Booking response contains all required properties\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"firstname\");\r",
+                  "    pm.expect(response).to.have.property(\"lastname\");\r",
+                  "    pm.expect(response).to.have.property(\"totalprice\");\r",
+                  "    pm.expect(response).to.have.property(\"depositpaid\");\r",
+                  "    pm.expect(response).to.have.property(\"bookingdates\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/booking/{{bookingid}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingid}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Booking IDs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response is an array\", function () {\r",
+                  "    pm.expect(response).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"At least one booking is returned\", function () {\r",
+                  "    pm.expect(response.length).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Each booking contains a booking ID\", function () {\r",
+                  "    response.forEach(function(item) {\r",
+                  "        pm.expect(item).to.have.property(\"bookingid\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/booking?firstname=John&lastname=Doe",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "booking"
+              ],
+              "query": [
+                {
+                  "key": "firstname",
+                  "value": "John"
+                },
+                {
+                  "key": "lastname",
+                  "value": "Doe"
+                }
               ]
             }
           },
