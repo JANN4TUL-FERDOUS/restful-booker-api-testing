@@ -36,10 +36,7 @@
                   "pm.test(\"Response body contains Created\", function () {\r",
                   "    pm.expect(pm.response.text()).to.include(\"Created\");\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is less than 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -74,6 +71,16 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "const authSchema = {\r",
+                  "    type: \"object\",\r",
+                  "    required: [\"token\"],\r",
+                  "    properties: {\r",
+                  "        token: {\r",
+                  "            type: \"string\"\r",
+                  "        }\r",
+                  "    }\r",
+                  "};\r",
+                  "\r",
                   "const response = pm.response.json();\r",
                   "\r",
                   "pm.test(\"Status code is 200\", function () {\r",
@@ -88,11 +95,11 @@
                   "    pm.expect(response.token).to.not.be.empty;\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is less than 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});\r",
+                  "pm.environment.set(\"token\", response.token);\r",
                   "\r",
-                  "pm.environment.set(\"token\", response.token);"
+                  "pm.test(\"Response matches Auth schema\", function () {\r",
+                  "    pm.response.to.have.jsonSchema(authSchema);\r",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -104,8 +111,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json",
+                "key": "",
+                "value": "",
                 "type": "text"
               }
             ],
@@ -142,11 +149,64 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const response = pm.response.json();",
+                  "const schema = {",
+                  "    type: \"object\",",
+                  "    required: [\"bookingid\", \"booking\"],",
+                  "    properties: {",
+                  "        bookingid: {",
+                  "            type: \"number\"",
+                  "        },",
+                  "        booking: {",
+                  "            type: \"object\",",
+                  "            required: [",
+                  "                \"firstname\",",
+                  "                \"lastname\",",
+                  "                \"totalprice\",",
+                  "                \"depositpaid\",",
+                  "                \"bookingdates\",",
+                  "                \"additionalneeds\"",
+                  "            ],",
+                  "            properties: {",
+                  "                firstname: {",
+                  "                    type: \"string\"",
+                  "                },",
+                  "                lastname: {",
+                  "                    type: \"string\"",
+                  "                },",
+                  "                totalprice: {",
+                  "                    type: \"number\"",
+                  "                },",
+                  "                depositpaid: {",
+                  "                    type: \"boolean\"",
+                  "                },",
+                  "                bookingdates: {",
+                  "                    type: \"object\",",
+                  "                    required: [",
+                  "                        \"checkin\",",
+                  "                        \"checkout\"",
+                  "                    ],",
+                  "                    properties: {",
+                  "                        checkin: {",
+                  "                            type: \"string\"",
+                  "                        },",
+                  "                        checkout: {",
+                  "                            type: \"string\"",
+                  "                        }",
+                  "                    }",
+                  "                },",
+                  "                additionalneeds: {",
+                  "                    type: \"string\"",
+                  "                }",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "};",
                   "",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
+                  "",
+                  "const response = pm.response.json();",
                   "",
                   "pm.test(\"Booking ID is returned\", function () {",
                   "    pm.expect(response.bookingid).to.exist;",
@@ -168,11 +228,12 @@
                   "    pm.expect(response.booking.depositpaid).to.eql(true);",
                   "});",
                   "",
-                  "pm.test(\"Response time is less than 1000 ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
-                  "});",
                   "",
-                  "pm.environment.set(\"bookingid\", response.bookingid);"
+                  "pm.environment.set(\"bookingid\", response.bookingid);",
+                  "",
+                  "pm.test(\"Response matches JSON schema\", function () {",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -184,8 +245,8 @@
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json",
+                "key": "",
+                "value": "",
                 "type": "text"
               }
             ],
@@ -217,11 +278,34 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const response = pm.response.json();\r",
+                  "const bookingSchema = {\r",
+                  "    type: \"object\",\r",
+                  "    required: [\r",
+                  "        \"firstname\",\r",
+                  "        \"lastname\",\r",
+                  "        \"totalprice\",\r",
+                  "        \"depositpaid\",\r",
+                  "        \"bookingdates\",\r",
+                  "        \"additionalneeds\"\r",
+                  "    ],\r",
+                  "    properties: {\r",
+                  "        firstname: { type: \"string\" },\r",
+                  "        lastname: { type: \"string\" },\r",
+                  "        totalprice: { type: \"number\" },\r",
+                  "        depositpaid: { type: \"boolean\" },\r",
+                  "        bookingdates: {\r",
+                  "            type: \"object\",\r",
+                  "            required: [\"checkin\", \"checkout\"],\r",
+                  "            properties: {\r",
+                  "                checkin: { type: \"string\" },\r",
+                  "                checkout: { type: \"string\" }\r",
+                  "            }\r",
+                  "        },\r",
+                  "        additionalneeds: { type: \"string\" }\r",
+                  "    }\r",
+                  "};\r",
                   "\r",
-                  "pm.test(\"Status code is 200\", function () {\r",
-                  "    pm.response.to.have.status(200);\r",
-                  "});\r",
+                  "const response = pm.response.json();\r",
                   "\r",
                   "pm.test(\"First name is correct\", function () {\r",
                   "    pm.expect(response.firstname).to.eql(\"John\");\r",
@@ -261,7 +345,13 @@
                   "\r",
                   "pm.test(\"Response time is below 1000 ms\", function () {\r",
                   "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response matches Booking schema\", function () {\r",
+                  "    pm.response.to.have.jsonSchema(bookingSchema);\r",
+                  "});\r",
+                  "\r",
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -311,10 +401,7 @@
                   "        pm.expect(item).to.have.property(\"bookingid\");\r",
                   "    });\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -354,9 +441,32 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () {\r",
-                  "    pm.response.to.have.status(200);\r",
-                  "});\r",
+                  "const bookingSchema = {\r",
+                  "    type: \"object\",\r",
+                  "    required: [\r",
+                  "        \"firstname\",\r",
+                  "        \"lastname\",\r",
+                  "        \"totalprice\",\r",
+                  "        \"depositpaid\",\r",
+                  "        \"bookingdates\",\r",
+                  "        \"additionalneeds\"\r",
+                  "    ],\r",
+                  "    properties: {\r",
+                  "        firstname: { type: \"string\" },\r",
+                  "        lastname: { type: \"string\" },\r",
+                  "        totalprice: { type: \"number\" },\r",
+                  "        depositpaid: { type: \"boolean\" },\r",
+                  "        bookingdates: {\r",
+                  "            type: \"object\",\r",
+                  "            required: [\"checkin\", \"checkout\"],\r",
+                  "            properties: {\r",
+                  "                checkin: { type: \"string\" },\r",
+                  "                checkout: { type: \"string\" }\r",
+                  "            }\r",
+                  "        },\r",
+                  "        additionalneeds: { type: \"string\" }\r",
+                  "    }\r",
+                  "};\r",
                   "\r",
                   "const response = pm.response.json();\r",
                   "\r",
@@ -385,7 +495,11 @@
                   "});\r",
                   "\r",
                   "pm.environment.set(\"firstname\", response.firstname);\r",
-                  "pm.environment.set(\"lastname\", response.lastname);"
+                  "pm.environment.set(\"lastname\", response.lastname);\r",
+                  "\r",
+                  "pm.test(\"Response matches Booking schema\", function () {\r",
+                  "    pm.response.to.have.jsonSchema(bookingSchema);\r",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -396,11 +510,6 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
               {
                 "key": "Accept",
                 "value": "application/json",
@@ -459,9 +568,6 @@
                   "    pm.expect(response.totalprice).to.eql(250);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});\r",
                   "pm.environment.set(\"firstname\", response.firstname);"
                 ],
                 "type": "text/javascript",
@@ -473,11 +579,6 @@
           "request": {
             "method": "PATCH",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
               {
                 "key": "Accept",
                 "value": "application/json",
@@ -526,9 +627,6 @@
                   "    pm.expect(pm.response.text()).to.eql(\"Created\");\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});\r",
                   ""
                 ],
                 "type": "text/javascript",
@@ -540,11 +638,6 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
               {
                 "key": "Cookie",
                 "value": "token={{token}}",
@@ -589,10 +682,7 @@
                   "pm.test(\"Token is not returned\", function () {\r",
                   "    pm.expect(response.token).to.be.undefined;\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -602,13 +692,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"username\": \"wronguser\",\r\n    \"password\": \"wrongpassword\"\r\n}",
@@ -648,10 +732,7 @@
                   "pm.test(\"Content-Type is text/plain\", function () {\r",
                   "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/plain\");\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -686,10 +767,6 @@
                   "    pm.response.to.have.status(500);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});\r",
-                  "\r",
                   "pm.test(\"Response is not successful\", function () {\r",
                   "    pm.expect(pm.response.code).to.not.equal(200);\r",
                   "});"
@@ -702,13 +779,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"firstname\": 123,\r\n    \"lastname\": true,\r\n    \"totalprice\": \"abc\",\r\n    \"depositpaid\": \"yes\",\r\n    \"bookingdates\": {\r\n        \"checkin\": null,\r\n        \"checkout\": null\r\n    },\r\n    \"additionalneeds\": 999\r\n}",
@@ -740,10 +811,7 @@
                   "pm.test(\"Status code is 500\", function () {\r",
                   "    pm.response.to.have.status(500);\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -753,13 +821,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n    \"firstname\": \"John\"\r\n}",
@@ -795,10 +857,7 @@
                   "pm.test(\"Response body contains Forbidden\", function () {\r",
                   "    pm.expect(pm.response.text()).to.include(\"Forbidden\");\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -808,13 +867,7 @@
           ],
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{base_url}}/booking/{{bookingid}}",
               "host": [
@@ -843,9 +896,7 @@
                   "    pm.expect(pm.response.text()).to.include(\"Method Not Allowed\");\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -856,11 +907,6 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              },
               {
                 "key": "Cookie",
                 "value": "token={{token}}",
@@ -903,10 +949,7 @@
                   "pm.test(\"Response body contains 'Method Not Allowed'\", function () {\r",
                   "    pm.expect(pm.response.text()).to.include(\"Method Not Allowed\");\r",
                   "});\r",
-                  "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -951,9 +994,7 @@
                   "    pm.expect(pm.response.text()).to.include(\"Forbidden\");\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response time is below 1000 ms\", function () {\r",
-                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
-                  "});"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -978,6 +1019,41 @@
           "response": []
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "pm.test(\"Response time is below 1000 ms\", function () {\r",
+          "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+          "});\r",
+          "\r",
+          "// Content-Type Header Exists\r",
+          "const contentType = pm.response.headers.get(\"Content-Type\");\r",
+          "\r",
+          "if (contentType) {\r",
+          "    pm.test(\"Content-Type header exists\", function () {\r",
+          "        pm.expect(contentType).to.not.be.empty;\r",
+          "    });\r",
+          "}"
+        ]
+      }
     }
   ]
 }
